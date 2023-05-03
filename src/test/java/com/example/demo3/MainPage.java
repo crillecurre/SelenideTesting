@@ -102,8 +102,21 @@ public class MainPage {
 
     public SelenideElement downloadTranscript = $x("//a[@href='https://www.student.ladok.se/student/proxy/extintegration/internal/intyg/2ee4d0ab-e8b7-11ed-9037-c7d987484aba/pdf']");
 
+    public SelenideElement createTranscript = $x("//button[@title='Skapa intyg']");
+
+    public SelenideElement selectIntygstyp = $x("//*[@id='intygstyp']");
+
+    public SelenideElement records = $x("//option[@value='2: Object']");
+
+    public SelenideElement buttonCreate = $x("//button[contains(@class, 'me-lg-3')]");
+
+    public SelenideElement buttonCreate2 = $("html > body > ladok-root > div > main > div > ladok-skapa-intyg > ladok-card > div > div > ladok-card-body > div:nth-of-type(3) > div > form > div:nth-of-type(3) > div > ladok-skapa-intyg-knapprad > div > button:nth-of-type(1)");
+
+    public SelenideElement cookieButton2 = $x("//button[@class='btn btn-light' and text()='Jag förstår']");
+    
 
 
+    
 
 
 

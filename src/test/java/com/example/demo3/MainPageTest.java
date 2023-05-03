@@ -347,10 +347,10 @@ public class MainPageTest {
 
 
     @Test
-    void studentTranscript () throws FileNotFoundException {
+    void studentTranscript () throws IOException {
 
 
-        Configuration.downloadsFolder = "C:/Users/Christian Söderström/IdeaProjects/demo2/target";
+        Configuration.downloadsFolder = "C:/Users/Christian Söderström/IdeaProjects/demo3/target/Intyg.pdf";
 
 
         //Opens the webpage for ltu.se
@@ -426,6 +426,10 @@ public class MainPageTest {
 
         //Download the student transcript
         File downloadedFile = mainPage.downloadTranscript.download();
+        if (downloadedFile.exists()) {
+            downloadedFile.delete();
+        }
+        downloadedFile.createNewFile();
 
         // wait for the file to be downloaded
         //File downloadedFile = new File(Configuration.downloadsFolder + "/Intyg.pdf");
@@ -434,6 +438,105 @@ public class MainPageTest {
         // verify that the file exists in the folder
 
         Assertions.assertTrue(downloadedFile.exists());
+
+    }
+
+
+    @Test
+    void createTranscript() throws InterruptedException {
+
+        Configuration.downloadsFolder = "C:/Users/Christian Söderström/IdeaProjects/demo3/target/Intyg.pdf";
+
+
+        //Opens the webpage for ltu.se
+        open("https://www.ltu.se/");
+
+        //Accept cookies
+        mainPage.cookieButton.click();
+        //Verify that we are on the right page
+        String url = WebDriverRunner.url();
+        Assertions.assertEquals(url, "https://www.ltu.se/");
+
+        mainPage.studentButton.shouldBe(visible).click();
+        //Verify that we are on the right page
+        String page = WebDriverRunner.url();
+        Assertions.assertEquals(page, "https://www.ltu.se/student");
+
+        mainPage.loggaIn.shouldBe(visible).click();
+
+        // Read Facebook credentials from JSON file
+        String email = null;
+        String password = null;
+        File jsonFile = new File("C:\\temp\\ltu.json");
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(jsonFile);
+            email = jsonNode.get("ltuCredentials").get("email").asText();
+            password = jsonNode.get("ltuCredentials").get("password").asText();
+        } catch (IOException e) {
+
+        }
+
+        //Send the credentials into the "användarid" and "lösenord" field
+        mainPage.inputUsername.sendKeys(email);
+        mainPage.inputPassword.sendKeys(password);
+
+        //Press button to login
+        mainPage.inputSubmit.click();
+
+        //Press on button intyg
+        mainPage.intygButton.shouldBe(visible).click();
+
+        // Get the window handle of the main window
+        String mainWindowHandle = getWebDriver().getWindowHandle();
+
+// Get the handles of all windows currently open
+        Set<String> allWindowHandles = getWebDriver().getWindowHandles();
+
+// Switch to the popup window
+        for (String windowHandle : allWindowHandles) {
+            if (!windowHandle.equals(mainWindowHandle)) {
+                getWebDriver().switchTo().window(windowHandle);
+                break;
+            }
+        }
+        //Press that you want to login to Ladok
+        mainPage.ladokInlog.shouldBe(visible).click();
+
+        //Click on the search box
+        mainPage.uniSearch.shouldBe(visible).click();
+
+        //Set input to the search box
+        mainPage.uniSearch.sendKeys("lule");
+
+        //Press on the choice that comes up (Luleå University)
+        mainPage.selectLule.shouldBe(visible).click();
+
+        //Presses Menu in the right upper corner
+        mainPage.ladokMenu.shouldBe(visible).click();
+
+        //Presses the button to come to transcripts
+        mainPage.certificates.shouldBe(visible).click();
+
+        //Press on button to create certificate
+        mainPage.createTranscript.shouldBe(visible).click();
+
+        //Clicks on the menu to select which type of certificate you want to create
+        mainPage.selectIntygstyp.shouldBe(visible).click();
+
+        //Chooses official transcripts of records
+        mainPage.records.shouldBe(visible).click();
+
+        //Holds for 2 seconds
+        Thread.sleep(2000);
+
+        //Clicks on the cookie button so it disappears
+        mainPage.cookieButton2.shouldBe(visible).click();
+
+        // Scroll to the element and click to create a certificate
+        executeJavaScript("arguments[0].scrollIntoView(true);", mainPage.buttonCreate2);
+        mainPage.buttonCreate2.shouldBe(visible).click();
+
 
     }
 }
