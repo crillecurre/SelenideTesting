@@ -113,6 +113,10 @@ public class MainPage {
     public SelenideElement buttonCreate2 = $("html > body > ladok-root > div > main > div > ladok-skapa-intyg > ladok-card > div > div > ladok-card-body > div:nth-of-type(3) > div > form > div:nth-of-type(3) > div > ladok-skapa-intyg-knapprad > div > button:nth-of-type(1)");
 
     public SelenideElement cookieButton2 = $x("//button[@class='btn btn-light' and text()='Jag förstår']");
+
+    public SelenideElement downloadTranscript2 = $x("//a[@href='https://www.student.ladok.se/student/proxy/extintegration/internal/intyg/d23104ce-e995-11ed-9037-c7d987484aba/pdf']");
+
+    
     
 
 

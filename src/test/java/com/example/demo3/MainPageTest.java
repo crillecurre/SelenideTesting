@@ -350,7 +350,7 @@ public class MainPageTest {
     void studentTranscript () throws IOException {
 
 
-        Configuration.downloadsFolder = "C:/Users/Christian Söderström/IdeaProjects/demo3/target/Intyg.pdf";
+        Configuration.downloadsFolder = "C:/Users/Christian Söderström/IdeaProjects/demo3/target";
 
 
         //Opens the webpage for ltu.se
@@ -425,7 +425,7 @@ public class MainPageTest {
 
 
         //Download the student transcript
-        File downloadedFile = mainPage.downloadTranscript.download();
+        File downloadedFile = mainPage.downloadTranscript2.download();
         if (downloadedFile.exists()) {
             downloadedFile.delete();
         }
