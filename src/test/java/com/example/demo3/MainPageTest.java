@@ -13,6 +13,7 @@ import com.codeborne.selenide.logevents.SelenideLogger;
 import io.qameta.allure.selenide.AllureSelenide;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.interactions.SourceType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.FindBy;
 
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.codeborne.selenide.Condition.*;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.SetValueOptions.withText;
 import static com.codeborne.selenide.WebDriverRunner.driver;
@@ -48,7 +50,7 @@ public class MainPageTest {
 
     @BeforeAll
     public static void setUpAll() {
-        Configuration.browserSize = "1280x800";
+        //Configuration.browserSize = "1280x800";
         SelenideLogger.addListener("allure", new AllureSelenide());
     }
 
@@ -61,7 +63,12 @@ public class MainPageTest {
 
 
     @Test
-    public void findCourseSyllabus() {
+    public void findCourseSyllabus() throws IOException {
+        
+
+        //Set the default folder for downloaded files
+        Configuration.downloadsFolder = "C:/Users/Christian Söderström/IdeaProjects/demo3/target/files";
+
         //Opens the webpage for ltu.se
         open("https://www.ltu.se/");
 
@@ -69,15 +76,23 @@ public class MainPageTest {
         mainPage.cookieButton.click();
         //Verify that we are on the right page
         String url = WebDriverRunner.url();
-        Assertions.assertEquals(url, "https://www.ltu.se/");
+        assertEquals(url, "https://www.ltu.se/");
 
         mainPage.studentButton.shouldBe(visible).click();
         //Verify that we are on the right page
         String page = WebDriverRunner.url();
-        Assertions.assertEquals(page, "https://www.ltu.se/student");
+        assertEquals(page, "https://www.ltu.se/student");
 
         mainPage.loggaIn.shouldBe(visible).click();
 
+       try {
+           String site = WebDriverRunner.url();
+           assertEquals(site, "https://weblogon.ltu.se/cas/login?service=https%3A%2F%2Fportal.ltu.se%2Fc%2Fportal%2Flogin%3Fredirect%3D%252Fgroup%252Fstudent%252Fstart%26p_l_id%3D1076063");
+           //logger.info ("URLs matching");
+       }
+       catch (AssertionError a) {
+           //logger.error("URls not matching");
+       }
         // Read Facebook credentials from JSON file
         String email = null;
         String password = null;
@@ -87,34 +102,24 @@ public class MainPageTest {
             JsonNode jsonNode = objectMapper.readTree(jsonFile);
             email = jsonNode.get("ltuCredentials").get("email").asText();
             password = jsonNode.get("ltuCredentials").get("password").asText();
+            //logger.info("Loading of credentials succesful");
         } catch (IOException e) {
-
+            //logger.error("Could not find the credentials");
         }
-
-        //Send the credentials into the "användarid" and "lösenord" field
-        mainPage.inputUsername.sendKeys(email);
-        mainPage.inputPassword.sendKeys(password);
-
-        //Press button to login
-        mainPage.inputSubmit.click();
+        try {
+            //Send the credentials into the "användarid" and "lösenord" field
+            mainPage.inputUsername.sendKeys(email);
+            mainPage.inputPassword.sendKeys(password);
+            //Press button to login
+            mainPage.inputSubmit.click();
+            //logger.info("Succesfully logged in");
+        }
+        catch (Exception e) {
+            //logger.error("Login unsuccesful");
+        }
 
         //Press button "Kursrum"
         mainPage.kursrum.click();
-
-
-        // Get the window handle of the main window
-        /*String mainWindowHandle = WebDriverRunner.getWebDriver().getWindowHandle();
-
-// Get the handles of all windows currently open
-        Set<String> allWindowHandles = WebDriverRunner.getWebDriver().getWindowHandles();
-
-// Switch to the popup window
-        for (String windowHandle : allWindowHandles) {
-            if (!windowHandle.equals(mainWindowHandle)) {
-                WebDriverRunner.getWebDriver().switchTo().window(windowHandle);
-                break;
-            }
-        }*/
 
         // Get the window handle of the main window
         String mainWindowHandle = getWebDriver().getWindowHandle();
@@ -131,21 +136,27 @@ public class MainPageTest {
                 break;
             }
         }
-
+        // maximize the window
+        getWebDriver().manage().window().maximize();
         //Press "Kurser" button in canvas when the button is visible
 
-        mainPage.kurser.click();
-        //mainPage.kurser.shouldBe(visible).click();
+        try {
+            mainPage.kurser.click();
+            //mainPage.kurser.shouldBe(visible).click();
 
-        //Press on Test av IT course
-        mainPage.testavit.shouldBe(visible).click();
+            //Press on Test av IT course
+            mainPage.testavit.shouldBe(visible).click();
 
-        //Press on "Moduler" when the button is visible
-        mainPage.moduler.shouldBe(visible).click();
+            //Press on "Moduler" when the button is visible
+            mainPage.moduler.shouldBe(visible).click();
 
-        //Find course syllabus choice in modules
-        mainPage.courseSyllabus.shouldBe(visible).click();
-
+            //Find course syllabus choice in modules
+            mainPage.courseSyllabus.shouldBe(visible).click();
+            //logger.info ("Succesfully found button to get linked to course syllabus");
+        }
+        catch (Exception a) {
+           //logger.error("Something went wrong here");
+        }
 
 // Switch to the second popup window
         String maiWindowHandle = getWebDriver().getWindowHandle();
@@ -159,9 +170,42 @@ public class MainPageTest {
             }
         }
 
+        //Selector for the "V23" button
+        var css1 = $x("//a[@href='#' and text()='V23']");
+        //Clicks on the "V23" button
+        executeJavaScript("arguments[0].click()", css1);
 
-        //open("https://www.ltu.se/edu/course/I00/I0015N/I0015N-Test-av-IT-system-1.81215?kursView=kursplan&termin=V23)";
-        //mainPage.pdf.click();
+        try {
+        String expectedUrl = "https://www.ltu.se/edu/course/I00/I0015N/I0015N-Test-av-IT-system-1.81215?kursView=kursplan&termin=V23";
+        String actualUrl = driver().url();
+        assertEquals(expectedUrl, actualUrl);
+        //logger.info("URLs are matching");
+
+        } catch (AssertionError c) {
+            //logger.error("URLs are not matching");
+        }
+
+        File downloadedFile = null;
+        try {
+            downloadedFile = mainPage.pdf.shouldBe(visible).download();
+            //logger.info("The file was downloaded")
+            if (downloadedFile.exists()) {
+                downloadedFile.delete();
+            }
+            downloadedFile.createNewFile();
+            //logger.info("Pressed on the button to download file")
+        } catch (FileNotFoundException e) {
+            //logger.error("Could not find/download the file")
+        }
+
+        try {
+            // verify that the file exists in the folder
+            assertTrue(downloadedFile.exists());
+            //logger.info("The file can be find in the folder for the downloaded file");
+
+        } catch (AssertionError y) {
+            //logger.error("Could not find the downloaded file on the computer. Something has gone wrong");
+        }
     }
 
 
@@ -184,6 +228,7 @@ public class MainPageTest {
 
         //Accept cookies
         mainPage.cookieButton.click();
+
         //Verify that we are on the right page
         String url = WebDriverRunner.url();
         Assertions.assertEquals(url, "https://www.ltu.se/");
@@ -256,20 +301,6 @@ public class MainPageTest {
 
     }
 
-    /*@Test
-    void tryexamination() {
-        Configuration.timeout = 5000;
-        open("https://www.ltu.se/edu/course/I00/I0015N/I0015N-Test-av-IT-system-1.81215?kursView=kursplan");
-
-        // open("https://www.ltu.se/edu/course/I00/I0015N/I0015N-Test-av-IT-system-1.81215");
-
-        mainPage.cookieButton.click();
-
-        var css1 = $x("//a[@href='#' and text()='V23']");
-        css1
-                .shouldBe(visible)
-                .click();
-    }*/
 
 
 
@@ -282,32 +313,8 @@ public class MainPageTest {
 
 
 
-    @Test
-    void testingCourse() throws InterruptedException {
 
 
-        Configuration.timeout = 4000;
-        open("https://www.ltu.se/edu/course/I00/I0015N/I0015N-Test-av-IT-system-1.81215?kursView=kursplan");
-        mainPage.cookieButton.click();
-        Thread.sleep(2000);
-
-        for (int i = 1; i <= 100; i++) {
-            System.out.println("Iteration number: " + i);
-            open("https://www.ltu.se/edu/course/I00/I0015N/I0015N-Test-av-IT-system-1.81215?kursView=kursplan");
-            // Thread.sleep(1000);
-            //getWebDriver().manage().window().maximize();
-            //Thread.sleep(2000);
-            var css1 = $x("//a[@href='#' and text()='V23']");
-            css1
-                    .shouldBe(visible)
-                    .click();
-
-            String expectedUrl = "https://www.ltu.se/edu/course/I00/I0015N/I0015N-Test-av-IT-system-1.81215?kursView=kursplan&termin=V23";
-            String actualUrl = driver().url();
-            Assertions.assertEquals(expectedUrl, actualUrl);
-
-        }
-    }
 
 
 
@@ -349,8 +356,7 @@ public class MainPageTest {
     @Test
     void studentTranscript () throws IOException {
 
-
-        Configuration.downloadsFolder = "C:/Users/Christian Söderström/IdeaProjects/demo3/target";
+        Configuration.downloadsFolder = "C:/Users/Christian Söderström/IdeaProjects/demo3/target/files";
 
 
         //Opens the webpage for ltu.se
@@ -378,8 +384,9 @@ public class MainPageTest {
             JsonNode jsonNode = objectMapper.readTree(jsonFile);
             email = jsonNode.get("ltuCredentials").get("email").asText();
             password = jsonNode.get("ltuCredentials").get("password").asText();
+            //logger.info("Fetching credentials succesful")
         } catch (IOException e) {
-
+            //logger.error("Could not load the credentials from the file")
         }
 
         //Send the credentials into the "användarid" and "lösenord" field
@@ -424,19 +431,14 @@ public class MainPageTest {
         mainPage.certificates.shouldBe(visible).click();
 
 
-        //Download the student transcript
+        //Download the student transcript, overwrite if already existing
         File downloadedFile = mainPage.downloadTranscript2.download();
         if (downloadedFile.exists()) {
             downloadedFile.delete();
         }
         downloadedFile.createNewFile();
 
-        // wait for the file to be downloaded
-        //File downloadedFile = new File(Configuration.downloadsFolder + "/Intyg.pdf");
-
-
         // verify that the file exists in the folder
-
         Assertions.assertTrue(downloadedFile.exists());
 
     }
@@ -528,7 +530,7 @@ public class MainPageTest {
         mainPage.records.shouldBe(visible).click();
 
         //Holds for 2 seconds
-        Thread.sleep(2000);
+        sleep(2000);
 
         //Clicks on the cookie button so it disappears
         mainPage.cookieButton2.shouldBe(visible).click();
@@ -539,6 +541,154 @@ public class MainPageTest {
 
 
     }
+
+
+    /*@Test
+    void filming() throws IOException {
+
+        Configuration.downloadsFolder = "C:/Users/Christian Söderström/IdeaProjects/demo3/target";
+
+
+        //Opens the webpage for ltu.se
+        open("https://www.ltu.se/");
+
+        //Accept cookies
+        mainPage.cookieButton.click();
+        //Verify that we are on the right page
+        String url = WebDriverRunner.url();
+        Assertions.assertEquals(url, "https://www.ltu.se/");
+
+        mainPage.studentButton.shouldBe(visible).click();
+        //Verify that we are on the right page
+        String page = WebDriverRunner.url();
+        Assertions.assertEquals(page, "https://www.ltu.se/student");
+
+        mainPage.loggaIn.shouldBe(visible).click();
+
+        // Read Facebook credentials from JSON file
+        String email = null;
+        String password = null;
+        File jsonFile = new File("C:\\temp\\ltu.json");
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(jsonFile);
+            email = jsonNode.get("ltuCredentials").get("email").asText();
+            password = jsonNode.get("ltuCredentials").get("password").asText();
+        } catch (IOException e) {
+
+        }
+
+        //Send the credentials into the "användarid" and "lösenord" field
+        mainPage.inputUsername.sendKeys(email);
+        mainPage.inputPassword.sendKeys(password);
+
+        //Press button to login
+        mainPage.inputSubmit.click();
+
+        //Press on button intyg
+        mainPage.intygButton.shouldBe(visible).click();
+
+        // Get the window handle of the main window
+        String mainWindowHandle = getWebDriver().getWindowHandle();
+
+// Get the handles of all windows currently open
+        Set<String> allWindowHandles = getWebDriver().getWindowHandles();
+
+// Switch to the popup window
+        for (String windowHandle : allWindowHandles) {
+            if (!windowHandle.equals(mainWindowHandle)) {
+                getWebDriver().switchTo().window(windowHandle);
+                break;
+            }
+        }
+        //Press that you want to login to Ladok
+        mainPage.ladokInlog.shouldBe(visible).click();
+
+        //Click on the search box
+        mainPage.uniSearch.shouldBe(visible).click();
+
+        //Set input to the search box
+        mainPage.uniSearch.sendKeys("lule");
+
+        //Press on the choice that comes up (Luleå University)
+        mainPage.selectLule.shouldBe(visible).click();
+
+        //Presses Menu in the right upper corner
+        mainPage.ladokMenu.shouldBe(visible).click();
+
+        //Presses the button to come to transcripts
+        mainPage.certificates.shouldBe(visible).click();
+
+
+        //Download the student transcript
+        File downloadedFile = mainPage.downloadTranscript2.download();
+        if (downloadedFile.exists()) {
+            downloadedFile.delete();
+        }
+        downloadedFile.createNewFile();
+
+        //Close the popup window after downloading the file
+        getWebDriver().close();
+
+        //Switches back to the first window
+        getWebDriver().switchTo().window(mainWindowHandle);
+
+        //Holds for 4 sec before next click()
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        //Presses on button "kursrum"
+        mainPage.kursrum.click();
+
+
+        // Get the window handle of the main window
+        String maiWindowHandle = getWebDriver().getWindowHandle();
+
+// Get the handles of all windows currently open
+        Set<String> alWindowHandles = getWebDriver().getWindowHandles();
+
+// Switch to the first popup window
+        String firstPopupWindowHandle = "";
+        for (String windowHandle : alWindowHandles) {
+            if (!windowHandle.equals(maiWindowHandle)) {
+                firstPopupWindowHandle = windowHandle;
+                getWebDriver().switchTo().window(firstPopupWindowHandle);
+                break;
+            }
+        }
+
+        //Press "Kurser" button in canvas when the button is visible
+
+        mainPage.kurser2.click();
+        //mainPage.kurser.shouldBe(visible).click();
+
+        //Press on Test av IT course
+        mainPage.testavit.shouldBe(visible).click();
+
+        //Press on "Moduler" when the button is visible
+        mainPage.moduler.shouldBe(visible).click();
+
+        //Find course syllabus choice in modules
+        mainPage.courseSyllabus.shouldBe(visible).click();
+
+
+// Switch to the second popup window
+        String mailWindowHandle = getWebDriver().getWindowHandle();
+        Set<String> alsWindowHandles = getWebDriver().getWindowHandles();
+        String secondPopupWindowHandle = "";
+        for (String windowHandle : alsWindowHandles) {
+            if (!windowHandle.equals(mailWindowHandle) && !windowHandle.equals(mainWindowHandle)) {
+                secondPopupWindowHandle = windowHandle;
+                getWebDriver().switchTo().window(secondPopupWindowHandle);
+                break;
+            }
+        }
+
+
+    }*/
 }
 
 

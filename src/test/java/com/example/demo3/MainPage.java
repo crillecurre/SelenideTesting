@@ -79,7 +79,7 @@ public class MainPage {
 
     public SelenideElement kurser = $("button[id*='courses']");
 
-    public SelenideElement pdf = $x("//img[@alt='PDF']");
+    //public SelenideElement pdf = $x("//img[@alt='PDF']");
 
     //SelenideElement v23 = $x("//select[@name='termin']/option[@value='V23']");
 
@@ -106,7 +106,7 @@ public class MainPage {
 
     public SelenideElement selectIntygstyp = $x("//*[@id='intygstyp']");
 
-    public SelenideElement records = $x("//option[@value='2: Object']");
+    public SelenideElement records = $x("//option[@value='1: Object']");
 
     public SelenideElement buttonCreate = $x("//button[contains(@class, 'me-lg-3')]");
 
@@ -115,6 +115,10 @@ public class MainPage {
     public SelenideElement cookieButton2 = $x("//button[@class='btn btn-light' and text()='Jag förstår']");
 
     public SelenideElement downloadTranscript2 = $x("//a[@href='https://www.student.ladok.se/student/proxy/extintegration/internal/intyg/d23104ce-e995-11ed-9037-c7d987484aba/pdf']");
+
+    public SelenideElement kurser2 = $x("//button[contains(@id, 'courses')]");
+
+    public SelenideElement pdf = $x("//a[@class='utbplan-pdf-link']");
 
     
     
