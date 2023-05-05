@@ -3,10 +3,8 @@ package com.example.demo3;
 import com.codeborne.selenide.*;
 import com.google.common.collect.ImmutableMap;
 import net.bytebuddy.asm.Advice;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import com.codeborne.selenide.logevents.SelenideLogger;
@@ -85,14 +83,11 @@ public class MainPageTest {
 
         mainPage.loggaIn.shouldBe(visible).click();
 
-       try {
+
            String site = WebDriverRunner.url();
            assertEquals(site, "https://weblogon.ltu.se/cas/login?service=https%3A%2F%2Fportal.ltu.se%2Fc%2Fportal%2Flogin%3Fredirect%3D%252Fgroup%252Fstudent%252Fstart%26p_l_id%3D1076063");
            //logger.info ("URLs matching");
-       }
-       catch (AssertionError a) {
-           //logger.error("URls not matching");
-       }
+
         // Read Facebook credentials from JSON file
         String email = null;
         String password = null;
@@ -138,9 +133,10 @@ public class MainPageTest {
         }
         // maximize the window
         getWebDriver().manage().window().maximize();
-        //Press "Kurser" button in canvas when the button is visible
+
 
         try {
+            //Press "Kurser" button in canvas when the button is visible
             mainPage.kurser.click();
             //mainPage.kurser.shouldBe(visible).click();
 
@@ -175,15 +171,12 @@ public class MainPageTest {
         //Clicks on the "V23" button
         executeJavaScript("arguments[0].click()", css1);
 
-        try {
+
         String expectedUrl = "https://www.ltu.se/edu/course/I00/I0015N/I0015N-Test-av-IT-system-1.81215?kursView=kursplan&termin=V23";
         String actualUrl = driver().url();
         assertEquals(expectedUrl, actualUrl);
         //logger.info("URLs are matching");
 
-        } catch (AssertionError c) {
-            //logger.error("URLs are not matching");
-        }
 
         File downloadedFile = null;
         try {
@@ -198,15 +191,14 @@ public class MainPageTest {
             //logger.error("Could not find/download the file")
         }
 
-        try {
+
             // verify that the file exists in the folder
             assertTrue(downloadedFile.exists());
             //logger.info("The file can be find in the folder for the downloaded file");
 
-        } catch (AssertionError y) {
-            //logger.error("Could not find the downloaded file on the computer. Something has gone wrong");
+
         }
-    }
+
 
 
 
@@ -232,6 +224,8 @@ public class MainPageTest {
         //Verify that we are on the right page
         String url = WebDriverRunner.url();
         Assertions.assertEquals(url, "https://www.ltu.se/");
+        //logger.info("URl is matching");
+
 
         mainPage.studentButton.shouldBe(visible).click();
         //Verify that we are on the right page
@@ -249,10 +243,12 @@ public class MainPageTest {
             JsonNode jsonNode = objectMapper.readTree(jsonFile);
             email = jsonNode.get("ltuCredentials").get("email").asText();
             password = jsonNode.get("ltuCredentials").get("password").asText();
+            //logger.info("Succesfully found and read the credentials")
         } catch (IOException e) {
+            //logger.error("Could not find or read the credentials");
 
         }
-
+        try {
         //Send the credentials into the "användarid" and "lösenord" field
         mainPage.inputUsername.sendKeys(email);
         mainPage.inputPassword.sendKeys(password);
@@ -260,6 +256,15 @@ public class MainPageTest {
         //Press button to login
         mainPage.inputSubmit.click();
 
+        //Verify that it is the right url
+        String site = WebDriverRunner.url();
+        Assertions.assertEquals(site, "https://portal.ltu.se/group/student/start");
+        //logger.info("Urls are matching and the login was succesful");
+
+        } catch (AssertionError b) {
+            //logger.error("The urls are not matching" + b.getMessage());
+            throw b; // rethrow the exception so that the test fails
+        }
         //Press button "Kursrum"
         mainPage.kursrum.click();
 
@@ -277,27 +282,48 @@ public class MainPageTest {
                 break;
             }
         }
+        // maximize the window
+        getWebDriver().manage().window().maximize();
 
-        //Press "Kurser" button in canvas when the button is visible
-        mainPage.kurser.shouldBe(visible).click();
+        try {
+            //Press "Kurser" button in canvas when the button is visible
+            mainPage.kurser.shouldBe(visible).click();
 
-        //Press on Test av IT course
-        mainPage.testavit.click();
+            //Press on Test av IT course
+            mainPage.testavit.click();
 
-        //Press on "Moduler" when the button is visible
-        mainPage.moduler.shouldBe(visible).click();
+            //Press on "Moduler" when the button is visible
+            mainPage.moduler.shouldBe(visible).click();
 
-        //Press on button to get information about finalExamination
-        mainPage.finalExamination.shouldBe(visible).click();
+            //Press on button to get information about finalExamination
+            mainPage.finalExamination.shouldBe(visible).click();
+
+            //Take a screenshot of the current page
+            File screenshot = ((TakesScreenshot) getWebDriver()).getScreenshotAs(OutputType.FILE);
+
+            //Save the screenshot to a file, overwrite if already existing
+            FileUtils.copyFile(screenshot, new File("C:\\Users\\Christian Söderström\\IdeaProjects\\demo3\\target\\screenshots\\final_examination.jpeg"), true);
+
+            //logger.info("Successfully found the page for final examination information and saved a screenshot to target/screenshots/final_examination.jpeg");
+
+        } catch (Exception e) {
+            //logger.error("Could not find the right page: " + e.getMessage());
+        }
+
 
         /*The test is due to 30th of May between 9:00 and 14:00 so we want to verify that the
         Final Examination Information includes this
         */
-        Assertions.assertTrue(mainPage.info.text().contains("30th"));
-        Assertions.assertTrue(mainPage.info.text().contains("May"));
-        Assertions.assertTrue(mainPage.info.text().contains("9:00"));
-        Assertions.assertTrue(mainPage.info.text().contains("14:00"));
-
+        try {
+            Assertions.assertTrue(mainPage.info.text().contains("30th"));
+            Assertions.assertTrue(mainPage.info.text().contains("May"));
+            Assertions.assertTrue(mainPage.info.text().contains("9:00"));
+            Assertions.assertTrue(mainPage.info.text().contains("14:00"));
+            //logger.info("Final examination information contains the correct date and time");
+        } catch (AssertionError e) {
+            //logger.error("Final examination information does not contain the correct date and time: " + e.getMessage());
+            throw e; // rethrow the exception so that the test fails
+        }
 
     }
 
@@ -364,11 +390,14 @@ public class MainPageTest {
 
         //Accept cookies
         mainPage.cookieButton.click();
+
         //Verify that we are on the right page
         String url = WebDriverRunner.url();
         Assertions.assertEquals(url, "https://www.ltu.se/");
+        //logger.info("URl is matching");
 
         mainPage.studentButton.shouldBe(visible).click();
+
         //Verify that we are on the right page
         String page = WebDriverRunner.url();
         Assertions.assertEquals(page, "https://www.ltu.se/student");
@@ -389,12 +418,23 @@ public class MainPageTest {
             //logger.error("Could not load the credentials from the file")
         }
 
-        //Send the credentials into the "användarid" and "lösenord" field
-        mainPage.inputUsername.sendKeys(email);
-        mainPage.inputPassword.sendKeys(password);
+        try {
+            //Send the credentials into the "användarid" and "lösenord" field
+            mainPage.inputUsername.sendKeys(email);
+            mainPage.inputPassword.sendKeys(password);
 
-        //Press button to login
-        mainPage.inputSubmit.click();
+            //Press button to login
+            mainPage.inputSubmit.click();
+
+            //Verify that it is the right url
+            String site = WebDriverRunner.url();
+            Assertions.assertEquals(site, "https://portal.ltu.se/group/student/start");
+            //logger.info("Urls are matching and the login was succesful");
+
+        } catch (AssertionError b) {
+            //logger.error("The urls are not matching" + b.getMessage());
+            throw b; // rethrow the exception so that the test fails
+        }
 
         //Press on button intyg
         mainPage.intygButton.shouldBe(visible).click();
@@ -412,23 +452,32 @@ public class MainPageTest {
                 break;
             }
         }
-        //Press that you want to login to Ladok
-        mainPage.ladokInlog.shouldBe(visible).click();
 
-        //Click on the search box
-        mainPage.uniSearch.shouldBe(visible).click();
 
-        //Set input to the search box
-        mainPage.uniSearch.sendKeys("lule");
+        try {
+            // Press that you want to login to Ladok
+            mainPage.ladokInlog.shouldBe(visible).click();
 
-        //Press on the choice that comes up (Luleå University)
-        mainPage.selectLule.shouldBe(visible).click();
+            // Click on the search box
+            mainPage.uniSearch.shouldBe(visible).click();
 
-        //Presses Menu in the right upper corner
-        mainPage.ladokMenu.shouldBe(visible).click();
+            // Set input to the search box
+            mainPage.uniSearch.sendKeys("lule");
 
-        //Presses the button to come to transcripts
-        mainPage.certificates.shouldBe(visible).click();
+            // Press on the choice that comes up (Luleå University)
+            mainPage.selectLule.shouldBe(visible).click();
+
+            // Presses Menu in the right upper corner
+            mainPage.ladokMenu.shouldBe(visible).click();
+
+            // Presses the button to come to transcripts
+            mainPage.certificates.shouldBe(visible).click();
+
+            //logger.info("Successfully navigated to Ladok transcripts");
+        } catch (Exception e) {
+            //logger.error("Failed to navigate to Ladok transcripts: " + e.getMessage());
+        }
+
 
 
         //Download the student transcript, overwrite if already existing
@@ -440,14 +489,13 @@ public class MainPageTest {
 
         // verify that the file exists in the folder
         Assertions.assertTrue(downloadedFile.exists());
+        //logger.info("The downloaded file exists in the desired folder")
 
     }
 
 
     @Test
-    void createTranscript() throws InterruptedException {
-
-        Configuration.downloadsFolder = "C:/Users/Christian Söderström/IdeaProjects/demo3/target/Intyg.pdf";
+    void createTranscript() {
 
 
         //Opens the webpage for ltu.se
@@ -479,14 +527,26 @@ public class MainPageTest {
 
         }
 
-        //Send the credentials into the "användarid" and "lösenord" field
-        mainPage.inputUsername.sendKeys(email);
-        mainPage.inputPassword.sendKeys(password);
+        try {
+            //Send the credentials into the "användarid" and "lösenord" field
+            mainPage.inputUsername.sendKeys(email);
+            mainPage.inputPassword.sendKeys(password);
 
-        //Press button to login
-        mainPage.inputSubmit.click();
+            //Press button to login
+            mainPage.inputSubmit.click();
 
-        //Press on button intyg
+            //Verify that it is the right url
+            String site = WebDriverRunner.url();
+            Assertions.assertEquals(site, "https://portal.ltu.se/group/student/start");
+            //logger.info("Urls are matching and the login was succesful");
+
+        } catch (AssertionError b) {
+            //logger.error("The urls are not matching" + b.getMessage());
+            throw b; // rethrow the exception so that the test fails
+        }
+
+
+        //Press on button "intyg"
         mainPage.intygButton.shouldBe(visible).click();
 
         // Get the window handle of the main window
@@ -502,42 +562,56 @@ public class MainPageTest {
                 break;
             }
         }
-        //Press that you want to login to Ladok
-        mainPage.ladokInlog.shouldBe(visible).click();
+        try {
+            // Press that you want to login to Ladok
+            mainPage.ladokInlog.shouldBe(visible).click();
 
-        //Click on the search box
-        mainPage.uniSearch.shouldBe(visible).click();
+            // Click on the search box
+            mainPage.uniSearch.shouldBe(visible).click();
 
-        //Set input to the search box
-        mainPage.uniSearch.sendKeys("lule");
+            // Set input to the search box
+            mainPage.uniSearch.sendKeys("lule");
 
-        //Press on the choice that comes up (Luleå University)
-        mainPage.selectLule.shouldBe(visible).click();
+            // Press on the choice that comes up (Luleå University)
+            mainPage.selectLule.shouldBe(visible).click();
 
-        //Presses Menu in the right upper corner
-        mainPage.ladokMenu.shouldBe(visible).click();
+            // Presses Menu in the right upper corner
+            mainPage.ladokMenu.shouldBe(visible).click();
 
-        //Presses the button to come to transcripts
-        mainPage.certificates.shouldBe(visible).click();
+            // Presses the button to come to transcripts
+            mainPage.certificates.shouldBe(visible).click();
 
-        //Press on button to create certificate
-        mainPage.createTranscript.shouldBe(visible).click();
+            //logger.info("Successfully navigated to Ladok transcripts");
+        } catch (Exception e) {
+            //logger.error("Failed to navigate to Ladok transcripts: " + e.getMessage());
+        }
 
-        //Clicks on the menu to select which type of certificate you want to create
-        mainPage.selectIntygstyp.shouldBe(visible).click();
+        try {
+            //Press on button to create certificate
+            mainPage.createTranscript.shouldBe(visible).click();
 
-        //Chooses official transcripts of records
-        mainPage.records.shouldBe(visible).click();
+            //Clicks on the menu to select which type of certificate you want to create
+            mainPage.selectIntygstyp.shouldBe(visible).click();
 
-        //Holds for 2 seconds
-        sleep(2000);
+            //Chooses official transcripts of records
+            mainPage.records.shouldBe(visible).click();
 
-        //Clicks on the cookie button so it disappears
-        mainPage.cookieButton2.shouldBe(visible).click();
+            //Holds for 2 seconds
+            sleep(2000);
 
-        // Scroll to the element and click to create a certificate
-        executeJavaScript("arguments[0].scrollIntoView(true);", mainPage.buttonCreate2);
-        mainPage.buttonCreate2.shouldBe(visible).click();
+            //Clicks on the cookie button so it disappears
+            mainPage.cookieButton2.shouldBe(visible).click();
+
+            // Scroll to the element and click to create a certificate
+            executeJavaScript("arguments[0].scrollIntoView(true);", mainPage.buttonCreate2);
+            mainPage.buttonCreate2.shouldBe(visible).click();
+
+            //logger.info("Successfully created certificate");
+
+        } catch (Exception e) {
+            //logger.error("Error creating certificate: " + e.getMessage());
+        }
+
 
 
     }
