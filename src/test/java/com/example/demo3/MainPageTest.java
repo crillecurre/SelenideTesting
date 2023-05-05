@@ -43,7 +43,7 @@ public class MainPageTest {
 
     @BeforeAll
     static void setup() {
-        Configuration.holdBrowserOpen = true;
+        //Configuration.holdBrowserOpen = true;
     }
 
     @BeforeAll
