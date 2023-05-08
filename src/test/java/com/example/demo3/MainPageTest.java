@@ -2,6 +2,7 @@ package com.example.demo3;
 
 import com.codeborne.selenide.*;
 import com.google.common.collect.ImmutableMap;
+import com.sun.tools.javac.Main;
 import net.bytebuddy.asm.Advice;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
@@ -18,6 +19,7 @@ import org.openqa.selenium.support.FindBy;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,9 +38,14 @@ import static com.codeborne.selenide.Selenide.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class MainPageTest {
     MainPage mainPage = new MainPage();
+    private static final Logger logger = LoggerFactory.getLogger(MainPageTest.class);
+
 
 
     @BeforeAll
@@ -69,7 +76,7 @@ public class MainPageTest {
 
         //Opens the webpage for ltu.se
         open("https://www.ltu.se/");
-
+        logger.info("Startup succesful");
         //Accept cookies
         mainPage.cookieButton.click();
         //Verify that we are on the right page
@@ -86,7 +93,7 @@ public class MainPageTest {
 
            String site = WebDriverRunner.url();
            assertEquals(site, "https://weblogon.ltu.se/cas/login?service=https%3A%2F%2Fportal.ltu.se%2Fc%2Fportal%2Flogin%3Fredirect%3D%252Fgroup%252Fstudent%252Fstart%26p_l_id%3D1076063");
-           //logger.info ("URLs matching");
+           logger.info ("URLs matching");
 
         // Read Facebook credentials from JSON file
         String email = null;
@@ -97,9 +104,9 @@ public class MainPageTest {
             JsonNode jsonNode = objectMapper.readTree(jsonFile);
             email = jsonNode.get("ltuCredentials").get("email").asText();
             password = jsonNode.get("ltuCredentials").get("password").asText();
-            //logger.info("Loading of credentials succesful");
+            logger.info("Loading of credentials succesful");
         } catch (IOException e) {
-            //logger.error("Could not find the credentials");
+            logger.error("Could not find the credentials");
         }
         try {
             //Send the credentials into the "användarid" and "lösenord" field
@@ -107,10 +114,10 @@ public class MainPageTest {
             mainPage.inputPassword.sendKeys(password);
             //Press button to login
             mainPage.inputSubmit.click();
-            //logger.info("Succesfully logged in");
+            logger.info("Succesfully logged in");
         }
         catch (Exception e) {
-            //logger.error("Login unsuccesful");
+            logger.error("Login unsuccesful");
         }
 
         //Press button "Kursrum"
@@ -131,7 +138,7 @@ public class MainPageTest {
                 break;
             }
         }
-        // maximize the window
+        //maximize the window
         getWebDriver().manage().window().maximize();
 
 
@@ -148,10 +155,10 @@ public class MainPageTest {
 
             //Find course syllabus choice in modules
             mainPage.courseSyllabus.shouldBe(visible).click();
-            //logger.info ("Succesfully found button to get linked to course syllabus");
+            logger.info ("Succesfully found button to get linked to course syllabus");
         }
         catch (Exception a) {
-           //logger.error("Something went wrong here");
+           logger.error("Something went wrong here");
         }
 
 // Switch to the second popup window
@@ -175,7 +182,7 @@ public class MainPageTest {
         String expectedUrl = "https://www.ltu.se/edu/course/I00/I0015N/I0015N-Test-av-IT-system-1.81215?kursView=kursplan&termin=V23";
         String actualUrl = driver().url();
         assertEquals(expectedUrl, actualUrl);
-        //logger.info("URLs are matching");
+        logger.info("URLs are matching");
 
 
         File downloadedFile = null;
@@ -186,15 +193,15 @@ public class MainPageTest {
                 downloadedFile.delete();
             }
             downloadedFile.createNewFile();
-            //logger.info("Pressed on the button to download file")
+            logger.info("Pressed on the button to download file");
         } catch (FileNotFoundException e) {
-            //logger.error("Could not find/download the file")
+            logger.error("Could not find/download the file");
         }
 
 
             // verify that the file exists in the folder
             assertTrue(downloadedFile.exists());
-            //logger.info("The file can be find in the folder for the downloaded file");
+            logger.info("The file can be find in the folder for the downloaded file");
 
 
         }
@@ -224,7 +231,7 @@ public class MainPageTest {
         //Verify that we are on the right page
         String url = WebDriverRunner.url();
         Assertions.assertEquals(url, "https://www.ltu.se/");
-        //logger.info("URl is matching");
+        logger.info("URl is matching");
 
 
         mainPage.studentButton.shouldBe(visible).click();
@@ -243,9 +250,9 @@ public class MainPageTest {
             JsonNode jsonNode = objectMapper.readTree(jsonFile);
             email = jsonNode.get("ltuCredentials").get("email").asText();
             password = jsonNode.get("ltuCredentials").get("password").asText();
-            //logger.info("Succesfully found and read the credentials")
+            logger.info("Succesfully found and read the credentials");
         } catch (IOException e) {
-            //logger.error("Could not find or read the credentials");
+            logger.error("Could not find or read the credentials");
 
         }
         try {
@@ -259,7 +266,7 @@ public class MainPageTest {
         //Verify that it is the right url
         String site = WebDriverRunner.url();
         Assertions.assertEquals(site, "https://portal.ltu.se/group/student/start");
-        //logger.info("Urls are matching and the login was succesful");
+        logger.info("Urls are matching and the login was succesful");
 
         } catch (AssertionError b) {
             //logger.error("The urls are not matching" + b.getMessage());
@@ -304,10 +311,10 @@ public class MainPageTest {
             //Save the screenshot to a file, overwrite if already existing
             FileUtils.copyFile(screenshot, new File("C:\\Users\\Christian Söderström\\IdeaProjects\\demo3\\target\\screenshots\\final_examination.jpeg"), true);
 
-            //logger.info("Successfully found the page for final examination information and saved a screenshot to target/screenshots/final_examination.jpeg");
+            logger.info("Successfully found the page for final examination information and saved a screenshot to target/screenshots/final_examination.jpeg");
 
         } catch (Exception e) {
-            //logger.error("Could not find the right page: " + e.getMessage());
+            logger.error("Could not find the right page: " + e.getMessage());
         }
 
 
@@ -319,9 +326,9 @@ public class MainPageTest {
             Assertions.assertTrue(mainPage.info.text().contains("May"));
             Assertions.assertTrue(mainPage.info.text().contains("9:00"));
             Assertions.assertTrue(mainPage.info.text().contains("14:00"));
-            //logger.info("Final examination information contains the correct date and time");
+            logger.info("Final examination information contains the correct date and time");
         } catch (AssertionError e) {
-            //logger.error("Final examination information does not contain the correct date and time: " + e.getMessage());
+            logger.error("Final examination information does not contain the correct date and time: " + e.getMessage());
             throw e; // rethrow the exception so that the test fails
         }
 
@@ -394,7 +401,7 @@ public class MainPageTest {
         //Verify that we are on the right page
         String url = WebDriverRunner.url();
         Assertions.assertEquals(url, "https://www.ltu.se/");
-        //logger.info("URl is matching");
+        logger.info("URl is matching");
 
         mainPage.studentButton.shouldBe(visible).click();
 
@@ -404,7 +411,7 @@ public class MainPageTest {
 
         mainPage.loggaIn.shouldBe(visible).click();
 
-        // Read Facebook credentials from JSON file
+        //Read Facebook credentials from JSON file
         String email = null;
         String password = null;
         File jsonFile = new File("C:\\temp\\ltu.json");
@@ -413,9 +420,9 @@ public class MainPageTest {
             JsonNode jsonNode = objectMapper.readTree(jsonFile);
             email = jsonNode.get("ltuCredentials").get("email").asText();
             password = jsonNode.get("ltuCredentials").get("password").asText();
-            //logger.info("Fetching credentials succesful")
+            logger.info("Fetching credentials succesful");
         } catch (IOException e) {
-            //logger.error("Could not load the credentials from the file")
+            logger.error("Could not load the credentials from the file");
         }
 
         try {
@@ -429,7 +436,7 @@ public class MainPageTest {
             //Verify that it is the right url
             String site = WebDriverRunner.url();
             Assertions.assertEquals(site, "https://portal.ltu.se/group/student/start");
-            //logger.info("Urls are matching and the login was succesful");
+            logger.info("Urls are matching and the login was succesful");
 
         } catch (AssertionError b) {
             //logger.error("The urls are not matching" + b.getMessage());
@@ -473,9 +480,9 @@ public class MainPageTest {
             // Presses the button to come to transcripts
             mainPage.certificates.shouldBe(visible).click();
 
-            //logger.info("Successfully navigated to Ladok transcripts");
+            logger.info("Successfully navigated to Ladok transcripts");
         } catch (Exception e) {
-            //logger.error("Failed to navigate to Ladok transcripts: " + e.getMessage());
+            logger.error("Failed to navigate to Ladok transcripts: " + e.getMessage());
         }
 
 
@@ -487,9 +494,9 @@ public class MainPageTest {
         }
         downloadedFile.createNewFile();
 
-        // verify that the file exists in the folder
+        //verify that the file exists in the folder
         Assertions.assertTrue(downloadedFile.exists());
-        //logger.info("The downloaded file exists in the desired folder")
+            logger.info("The downloaded file exists in the desired folder");
 
     }
 
@@ -506,11 +513,13 @@ public class MainPageTest {
         //Verify that we are on the right page
         String url = WebDriverRunner.url();
         Assertions.assertEquals(url, "https://www.ltu.se/");
+        logger.info("Urls are matching");
 
         mainPage.studentButton.shouldBe(visible).click();
         //Verify that we are on the right page
         String page = WebDriverRunner.url();
         Assertions.assertEquals(page, "https://www.ltu.se/student");
+        logger.info("Urls are matching");
 
         mainPage.loggaIn.shouldBe(visible).click();
 
@@ -523,8 +532,9 @@ public class MainPageTest {
             JsonNode jsonNode = objectMapper.readTree(jsonFile);
             email = jsonNode.get("ltuCredentials").get("email").asText();
             password = jsonNode.get("ltuCredentials").get("password").asText();
+            logger.info("Fetching credentials succesful");
         } catch (IOException e) {
-
+            logger.error("Could not load the credentials from the file");
         }
 
         try {
@@ -538,10 +548,10 @@ public class MainPageTest {
             //Verify that it is the right url
             String site = WebDriverRunner.url();
             Assertions.assertEquals(site, "https://portal.ltu.se/group/student/start");
-            //logger.info("Urls are matching and the login was succesful");
+            logger.info("Urls are matching and the login was succesful");
 
         } catch (AssertionError b) {
-            //logger.error("The urls are not matching" + b.getMessage());
+            logger.error("The urls are not matching" + b.getMessage());
             throw b; // rethrow the exception so that the test fails
         }
 
@@ -581,9 +591,9 @@ public class MainPageTest {
             // Presses the button to come to transcripts
             mainPage.certificates.shouldBe(visible).click();
 
-            //logger.info("Successfully navigated to Ladok transcripts");
+            logger.info("Successfully navigated to Ladok transcripts");
         } catch (Exception e) {
-            //logger.error("Failed to navigate to Ladok transcripts: " + e.getMessage());
+            logger.error("Failed to navigate to Ladok transcripts: " + e.getMessage());
         }
 
         try {
@@ -606,10 +616,10 @@ public class MainPageTest {
             executeJavaScript("arguments[0].scrollIntoView(true);", mainPage.buttonCreate2);
             mainPage.buttonCreate2.shouldBe(visible).click();
 
-            //logger.info("Successfully created certificate");
+            logger.info("Successfully created certificate");
 
         } catch (Exception e) {
-            //logger.error("Error creating certificate: " + e.getMessage());
+            logger.error("Error creating certificate: " + e.getMessage());
         }
 
 
