@@ -120,6 +120,9 @@ public class MainPage {
 
     public SelenideElement pdf = $x("//a[@class='utbplan-pdf-link']");
 
+    public SelenideElement dropdown = $x("//div[@class='fOyUs_bGBk']");
+    
+
     
     
 

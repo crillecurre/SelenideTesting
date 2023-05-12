@@ -144,9 +144,9 @@ public class MainPageTest {
 
         try {
             //Press "Kurser" button in canvas when the button is visible
-            mainPage.kurser.click();
-            //mainPage.kurser.shouldBe(visible).click();
-
+            //mainPage.kurser.click();
+            mainPage.kurser.shouldBe(visible).click();
+            //mainPage.dropdown.shouldBe(visible);
             //Press on Test av IT course
             mainPage.testavit.shouldBe(visible).click();
 
@@ -295,6 +295,8 @@ public class MainPageTest {
         try {
             //Press "Kurser" button in canvas when the button is visible
             mainPage.kurser.shouldBe(visible).click();
+
+            //mainPage.dropdown.shouldBe(visible);
 
             //Press on Test av IT course
             mainPage.testavit.click();
