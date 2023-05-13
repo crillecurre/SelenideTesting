@@ -77,6 +77,6 @@ public class MainPage {
 
 
     public SelenideElement kurser = $x("//*[@id='global_nav_courses_link']");
-//Hejsan
+
 }
 

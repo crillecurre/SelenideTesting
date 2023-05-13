@@ -475,7 +475,7 @@ public class MainPageTest {
 
             //Press button to login
             mainPage.inputSubmit.click();
-            //hejsan
+            
 
             //Verify that it is the right url
             String site = WebDriverRunner.url();
