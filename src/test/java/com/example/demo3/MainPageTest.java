@@ -1,34 +1,20 @@
 package com.example.demo3;
 
 import com.codeborne.selenide.*;
-import com.google.common.collect.ImmutableMap;
-import com.sun.tools.javac.Main;
-import net.bytebuddy.asm.Advice;
+
 import org.apache.commons.io.FileUtils;
-//import org.openqa.selenium.*;
-//import org.openqa.selenium.chrome.ChromeDriver;
-//import org.openqa.selenium.chrome.ChromeOptions;
-import com.codeborne.selenide.logevents.SelenideLogger;
-import io.qameta.allure.selenide.AllureSelenide;
+
 import org.junit.jupiter.api.*;
-//import org.openqa.selenium.interactions.Actions;
-//import org.openqa.selenium.interactions.SourceType;
-//import org.openqa.selenium.remote.DesiredCapabilities;
-//import org.openqa.selenium.support.FindBy;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
+
 import java.util.Set;
 
-import static com.codeborne.selenide.Condition.*;
+
 import static com.codeborne.selenide.Condition.visible;
-import static com.codeborne.selenide.Selectors.byText;
-import static com.codeborne.selenide.SetValueOptions.withText;
+
 import static com.codeborne.selenide.WebDriverRunner.driver;
 import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,8 +24,7 @@ import static com.codeborne.selenide.Selenide.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.chrome.ChromeOptions;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,20 +37,12 @@ public class MainPageTest {
     @BeforeAll
     public static void setUpAll() {
         //Configuration.browserSize = "1280x800";
-        SelenideLogger.addListener("allure", new AllureSelenide());
-        /*Configuration.browser = "chrome";
+
+        Configuration.browser = "chrome";
         Configuration.headless = false;
         Configuration.fastSetValue = true;
         Configuration.proxyEnabled = false;
         Configuration.savePageSource = false;
-        Configuration.baseUrl = "https://www.ltu.se/";*/
-
-    }
-
-    @BeforeEach
-    public void setUp() {
-
-        Configuration.browserCapabilities = new ChromeOptions().addArguments("--remote-allow-origins=*");
 
     }
 
