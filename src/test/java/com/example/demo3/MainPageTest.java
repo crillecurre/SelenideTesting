@@ -5,16 +5,16 @@ import com.google.common.collect.ImmutableMap;
 import com.sun.tools.javac.Main;
 import net.bytebuddy.asm.Advice;
 import org.apache.commons.io.FileUtils;
-import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
+//import org.openqa.selenium.*;
+//import org.openqa.selenium.chrome.ChromeDriver;
+//import org.openqa.selenium.chrome.ChromeOptions;
 import com.codeborne.selenide.logevents.SelenideLogger;
 import io.qameta.allure.selenide.AllureSelenide;
 import org.junit.jupiter.api.*;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.interactions.SourceType;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.support.FindBy;
+//import org.openqa.selenium.interactions.Actions;
+//import org.openqa.selenium.interactions.SourceType;
+//import org.openqa.selenium.remote.DesiredCapabilities;
+//import org.openqa.selenium.support.FindBy;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,6 +38,8 @@ import static com.codeborne.selenide.Selenide.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,11 +53,18 @@ public class MainPageTest {
     public static void setUpAll() {
         //Configuration.browserSize = "1280x800";
         SelenideLogger.addListener("allure", new AllureSelenide());
+        /*Configuration.browser = "chrome";
+        Configuration.headless = false;
+        Configuration.fastSetValue = true;
+        Configuration.proxyEnabled = false;
+        Configuration.savePageSource = false;
+        Configuration.baseUrl = "https://www.ltu.se/";*/
+
     }
 
     @BeforeEach
     public void setUp() {
-        // Fix the issue https://github.com/SeleniumHQ/selenium/issues/11750
+
         Configuration.browserCapabilities = new ChromeOptions().addArguments("--remote-allow-origins=*");
 
     }
@@ -63,8 +72,6 @@ public class MainPageTest {
 
     @Test
     public void findCourseSyllabus() throws IOException {
-        
-
         //Set the default folder for downloaded files
         Configuration.downloadsFolder = "C:/Users/Christian Söderström/IdeaProjects/demo3/target/files";
 
@@ -287,7 +294,7 @@ public class MainPageTest {
             mainPage.finalExamination.shouldBe(visible).click();
 
             //Take a screenshot of the current page
-            File screenshot = ((TakesScreenshot) getWebDriver()).getScreenshotAs(OutputType.FILE);
+            File screenshot = Screenshots.takeScreenShotAsFile();
 
             //Save the screenshot to a file, overwrite if already existing
             FileUtils.copyFile(screenshot, new File("C:\\Users\\Christian Söderström\\IdeaProjects\\demo3\\target\\screenshots\\final_examination.jpeg"), true);
@@ -475,7 +482,7 @@ public class MainPageTest {
 
             //Press button to login
             mainPage.inputSubmit.click();
-            
+
 
             //Verify that it is the right url
             String site = WebDriverRunner.url();
